@@ -1,0 +1,51 @@
+:root {
+    --primary-bg: #1a1c23;
+    --secondary-bg: #252833;
+    --tertiary-bg: #2e3440;
+    --text-primary: #e5e9f0;
+    --text-secondary: #d8dee9;
+    --accent-color: #5e81ac;
+    --accent-hover: #81a1c1;
+    --border-color: #3b4252;
+    --success-color: #a3be8c;
+    --error-color: #bf616a;
+    --timeline-bg: #2b2d42;
+    --track-bg: #343a40;
+    --track-audio: #4cc9f0;
+    --track-video: #f72585;
+    --track-text: #7209b7;
+    --track-image: #4895ef;
+    --playhead-color: #ffd700;
+    --darker: #1a1c23;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--tertiary-bg); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+button {
+    padding: 10px 14px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+button:hover { background-color: var(--accent-hover); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }

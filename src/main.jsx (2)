@@ -1,0 +1,141 @@
+import { render } from 'preact';
+import { App } from './App.jsx';
+
+import './styles/globals.css';
+import './styles/layout.css';
+import './styles/timeline.css';
+import './styles/editor.css';
+import './styles/modals.css';
+import './styles/landing.css';
+
+import { supabase } from './services/supabase.js';
+import { SupabaseDBManager } from './services/dbManager.js';
+import { VideoEditor } from './services/videoEditor.js';
+import { AdvancedProjectManagerUI } from './services/projectManager.js';
+import { auth } from './services/auth.js';
+
+// Strip leftover OAuth params
+(function cleanOAuthParams() {
+    const hasOAuth =
+        window.location.search.includes('code=') ||
+        window.location.search.includes('error=') ||
+        window.location.hash.includes('access_token') ||
+        window.location.hash.includes('refresh_token');
+    if (hasOAuth) {
+        window.history.replaceState({}, '', window.location.pathname);
+        console.log('🧹 Cleaned OAuth params from URL');
+    }
+})();
+
+async function bootstrap() {
+    console.log('🚀 Bootstrapping editor...');
+
+    const editor = new VideoEditor();
+    editor.setSupabase(supabase);
+
+    const dbManager = new SupabaseDBManager(supabase);
+    dbManager.editor = editor;
+
+    try {
+        await dbManager.init();
+        console.log('✅ Database ready');
+    } catch (err) {
+        console.error('❌ Database init failed:', err);
+    }
+
+    const projectManager = new AdvancedProjectManagerUI(editor, dbManager);
+
+    window.videoEditor = editor;
+    window.dbManager = dbManager;
+    window.projectManager = projectManager;
+
+    if (!auth.isLoggedIn()) {
+        auth.login('Guest');
+    }
+
+    const root = document.getElementById('app');
+    if (!root) throw new Error('#app container not found');
+
+    render(
+        <App editor={editor} dbManager={dbManager} projectManager={projectManager} />,
+        root
+    );
+
+    // Start editor AFTER Preact commits DOM
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            console.log('🎬 Starting editor (diagnostic mode)');
+
+            const steps = [
+                ['cacheElements', () => editor.cacheElements?.()],
+                ['setupEventListeners', () => editor.setupEventListeners?.()],
+                ['setupTrimmerEventListeners', () => editor.setupTrimmerEventListeners?.()],
+                ['setupTimelineDrag', () => editor.setupTimelineDrag?.()],
+                ['initAudioContext', () => editor.initAudioContext?.()],
+                ['setupImageEditor', () => editor.setupImageEditor?.()],
+                ['setupVideoPlayer', () => editor.setupVideoPlayer?.()],
+                ['setupClipContextMenu', () => editor.setupClipContextMenu?.()],
+                ['createTimeRuler', () => editor.createTimeRuler?.()],
+                ['updateTimeRuler', () => editor.updateTimeRuler?.()],
+                ['updatePreview', () => editor.updatePreview?.()],
+                ['animate', () => editor.animate?.()]
+            ];
+
+            for (const [name, fn] of steps) {
+                try {
+                    fn();
+                    console.log(`  ✅ ${name}`);
+                } catch (err) {
+                    console.error(`  ❌ ${name}:`, err?.message || err);
+                }
+            }
+
+            // Report missing IDs
+            const ids = [
+                'playBtn','pauseBtn','stopBtn','mediaUpload','clipDuration','durationValue',
+                'textContent','textDuration','textDurationValue','addTextBtn','snapGrid','titleCard',
+                'timelineZoomSlider','timelineZoom','zoomValue','clearTimelineBtn',
+                'mediaGrid','mediaGridx','statusMessage','statusMessagex','masterVolume',
+                'volumeValue','maxDuration','zoomInBtn','zoomOutBtn','analyzeAudioBtn',
+                'beatSyncToggle','audioAnalysisInfo','beatSensitivity','beatSensitivityValue',
+                'autoSnapBeats','syncSelectedVideosBtn','syncAllVideosBtn','autoSyncVideosBtn',
+                'clearVideoSyncBtn','beatsPerVideo','beatsPerVideoValue','syncPrecision',
+                'syncSelectedImagesBtn','beatsPerImage','beatsPerImageValue','imageTransition',
+                'toggleBeatVizBtn','showBeatNumbers','vizIntensitySlider','vizIntensityValue',
+                'playheadSlider','playhead','timeRuler','timeDisplay','videoTrack','imageTrack',
+                'audioTrack','textTrack','videoPreview','previewOverlay','loadingOverlay',
+                'snapIndicator','importBtn','renderVideoBtn','renderBtn','projectName',
+                'projectStatus'
+            ];
+            const missing = ids.filter(id => !document.getElementById(id));
+            if (missing.length) {
+                console.warn('⚠️ Missing IDs:', missing);
+            } else {
+                console.log('✅ All expected DOM elements present');
+            }
+
+            console.log('🎬 Editor diagnostic complete');
+        });
+    });
+
+    console.log('🎉 App mounted');
+}
+
+bootstrap().catch((err) => {
+    console.error('💥 Bootstrap failed:', err);
+    const root = document.getElementById('app') || document.body;
+    root.innerHTML = `
+        <div style="padding:40px;font-family:system-ui;color:#e5e9f0;background:#1a1c23;min-height:100vh;box-sizing:border-box;">
+            <h1 style="color:#bf616a;margin-top:0;">⚠️ Bootstrap failed</h1>
+            <pre style="background:#000;padding:20px;border-radius:6px;overflow:auto;color:#a3be8c;font-size:13px;">${String(err?.stack || err)}</pre>
+            <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#5e81ac;color:white;border:none;border-radius:4px;cursor:pointer;">Reload</button>
+        </div>
+    `;
+});
+
+window.addEventListener('error', (e) => {
+    console.error('🔴 Unhandled error:', e.error || e.message);
+});
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('🔴 Unhandled promise rejection:', e.reason);
+});

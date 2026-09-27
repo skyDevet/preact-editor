@@ -1,0 +1,142 @@
+.timeline-container {
+    margin-top: 15px;
+    background: var(--timeline-bg);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.timeline {
+    height: 180px;
+    background: var(--track-bg);
+    border-radius: 6px;
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    user-select: none;
+}
+
+.track {
+    height: 50px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    min-width: 800px;
+}
+
+.track-label {
+    position: absolute;
+    left: -7px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: white;
+    width: 70px;
+    font-weight: 500;
+    z-index: 5;
+    background: var(--track-bg);
+    padding: 0 5px;
+}
+
+.track-content {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    background: rgba(0,0,0,0.2);
+    min-width: 720px;
+}
+
+.time-ruler {
+    height: 20px;
+    background: var(--track-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    padding-left: 80px;
+    min-width: 800px;
+    font-size: 0.7rem;
+}
+
+.time-marker {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: rgba(255,255,255,0.2);
+}
+
+.time-label {
+    position: absolute;
+    top: 2px;
+    font-size: 9px;
+    color: var(--text-secondary);
+    transform: translateX(-50%);
+}
+
+.clip {
+    position: absolute;
+    height: 40px;
+    top: 5px;
+    border-radius: 4px;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    font-size: 0.85rem;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 1;
+    min-width: 40px;
+}
+
+.clip:hover { opacity: 0.9; }
+.clip.dragging { opacity: 0.7; z-index: 1000; }
+.clip.selected { box-shadow: 0 0 0 2px #ffd700 !important; z-index: 10 !important; }
+
+.video-clip { background: var(--track-video); }
+.image-clip { background: var(--track-image); }
+.audio-clip { background: var(--track-audio); }
+.text-clip { background: var(--track-text); }
+
+.clip-handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 8px;
+    background: rgba(255,255,255,0.5);
+    cursor: ew-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+.clip:hover .clip-handle { opacity: 1; }
+.clip-handle.left { left: 0; cursor: w-resize; }
+.clip-handle.right { right: 0; cursor: e-resize; }
+
+.playhead {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--playhead-color);
+    z-index: 100;
+    pointer-events: none;
+    left: 80px;
+}
+.playhead::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -4px;
+    width: 10px; height: 10px;
+    background: var(--playhead-color);
+    border-radius: 50%;
+}
+
+.snap-indicator {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.5);
+    pointer-events: none;
+    display: none;
+    left: 80px;
+}
